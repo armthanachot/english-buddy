@@ -1,0 +1,21 @@
+{
+  "name": "english-buddy",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:server": "bun run --filter=server dev",
+    "dev:client": "bun run --filter=client dev",
+    "dev": "bun run dev:server & bun run dev:client",
+    "install:all": "bun install"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
