@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "elysia": "1.4.18",
-    "shared": "workspace:*"
+    "openai": "6.10.0",
+    "shared": "workspace:*",
+    "zod": "4.1.13"
   }
 }
