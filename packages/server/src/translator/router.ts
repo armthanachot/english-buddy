@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 import TranslatorService from "./service";
-import { SituationRequestSchema, TranslateRequestSchema, type SituationRequest, type TranslateRequest } from "./model/req";
-import { SituationResponseSchema, TranslateResponseSchema } from "./model/res";
+import { SituationRequestSchema, TranslateRequestSchema, UsageExplanationRequestSchema, type SituationRequest, type TranslateRequest, type UsageExplanationRequest } from "shared/model/translator/req";
+import { SituationResponseSchema, TranslateResponseSchema, UsageExplanationResponseSchema } from "shared/model/translator/res";
 
 const TranslatorRouter = new Elysia({
     prefix: "/translator"
@@ -16,6 +16,11 @@ const TranslatorRouter = new Elysia({
     }, {
         body: SituationRequestSchema,
         response: SituationResponseSchema,
+    }).post("/usage-explanation", async ({ body }) => {
+        return await TranslatorService.usageExplanation(body as UsageExplanationRequest);
+    }, {
+        body: UsageExplanationRequestSchema,
+        response: UsageExplanationResponseSchema,
     });
 
 export default TranslatorRouter;

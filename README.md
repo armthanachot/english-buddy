@@ -22,7 +22,7 @@
 {
     //...
     "exports": { //ตรงนี้ หากมีการแยก folder หรือ แยกไฟล์ ใน packages ต้องมา export เพิ่ม เช่น `"utils":"./pkg/utils/*.ts"`
-        ".": "./index.ts" //ใช้ . แปลว่า ตอน import ก็แค่ {...} from "shared"
+        ".": "./index.ts" //ใช้ . แปลว่า ตอน import ก็แค่ {...} from "shared" และถ้าจะแยก file หรือ folder ออกไป ก็ใช้ ./ นำหน้า path ที่ต้องการ
     }
     //...
 }

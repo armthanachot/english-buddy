@@ -1,4 +1,4 @@
-import { t, type TSchema } from "elysia";
+import { Type as t, type TSchema } from "@sinclair/typebox";
 
 export const ResSchema = <T extends TSchema>(data: T) => t.Object({
     data: t.Optional(data),

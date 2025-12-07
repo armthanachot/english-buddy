@@ -12,6 +12,11 @@
   },
   "main": "index.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./model/translator/req": "./model/translator/req.ts",
+    "./model/translator/res": "./model/translator/res.ts"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "0.34.41"
   }
 }
