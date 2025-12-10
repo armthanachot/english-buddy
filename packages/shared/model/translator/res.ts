@@ -1,24 +1,32 @@
 import { Type as t, type Static } from "@sinclair/typebox";
 import { ResSchema } from "../response";
 
-export const TranslateResponseSchema = ResSchema(t.Object({
+export const TTranslate = t.Object({
     translatedText: t.String(),
-}))
+})
+export const TranslateResponseSchema = ResSchema(TTranslate)
 
-export const SituationResponseSchema = ResSchema(t.Array(t.Object({
+export const TSituation = t.Array(t.Object({
     situation: t.String(),
     translatedSituation: t.String(),
-})))
-
-export const UsageExplanationResponseSchema = ResSchema(t.Object({
-    usageExplanation: t.String(),
 }))
+export const SituationResponseSchema = ResSchema(TSituation)
 
-export const KeywordDetectResponseSchema = ResSchema(t.Array(t.Object({
+export const TUsageExplanation = t.Object({
+    usageExplanation: t.String(),
+})
+export const UsageExplanationResponseSchema = ResSchema(TUsageExplanation)
+
+export const TKeywordDetect = t.Array(t.Object({
     phrase: t.String(),
     explanation: t.String(),
-})))
+}))
+export const KeywordDetectResponseSchema = ResSchema(TKeywordDetect)
 
+export type TTranslate = Static<typeof TTranslate>;
+export type TSituation = Static<typeof TSituation>;
+export type TUsageExplanation = Static<typeof TUsageExplanation>;
+export type TKeywordDetect = Static<typeof TKeywordDetect>;
 export type TranslateResponseSchemaType = Static<typeof TranslateResponseSchema>;
 export type SituationResponseSchemaType = Static<typeof SituationResponseSchema>;
 export type UsageExplanationResponseSchemaType = Static<typeof UsageExplanationResponseSchema>;

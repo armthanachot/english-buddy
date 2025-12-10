@@ -14,7 +14,11 @@
   "exports": {
     ".": "./index.ts",
     "./model/translator/req": "./model/translator/req.ts",
-    "./model/translator/res": "./model/translator/res.ts"
+    "./model/translator/res": "./model/translator/res.ts",
+    "./model/core/req": "./model/core/req.ts",
+    "./model/core/res": "./model/core/res.ts",
+    "./model/user/req": "./model/user/req.ts",
+    "./model/user/res": "./model/user/res.ts"
   },
   "dependencies": {
     "@sinclair/typebox": "0.34.41"

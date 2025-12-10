@@ -1,20 +1,21 @@
 // packages/server/src/index.ts
 import { Elysia } from 'elysia';
-import { type User, API_PREFIX } from 'shared'; // Import Type และตัวแปรจาก shared
 import TranslatorRouter from './translator/router';
-
-const userExample: User = {
-  id: 'u001',
-  name: 'Bun User',
-  role: 'admin',
-};
+import db from '../dependencies/db';
+import UserRouter from './user/router';
+import CoreRouter from './core/router';
 
 const app = new Elysia({
-  prefix:"api/v1"
+  prefix: "api/v1"
+}).onStart(() => {
+  db.init();
+}).onStop(() => {
+  db.stop();
 })
   .get('/', () => 'Hello from Elysia Backend!')
   .use(TranslatorRouter)
-  // .get(`${API_PREFIX}/user`, () => userExample as User) // ใช้ API_PREFIX และ Type
+  .use(UserRouter)
+  .use(CoreRouter)
   .listen(3001);
 
 console.log(

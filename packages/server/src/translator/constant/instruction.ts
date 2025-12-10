@@ -120,7 +120,6 @@ export const MAPPING_INSTRUCTION = {
             data: z.array(z.object({
                 situation: z.string(),
                 translatedSituation: z.string(),
-                usageExplanation: z.string(),
             })),
         }), "data"),
         temperature: 0.7,
@@ -137,7 +136,7 @@ export const MAPPING_INSTRUCTION = {
         instruction: KEYWORD_DETECT,
         model: process.env.KEYWORD_DETECT_MODEL,
         schema: zodTextFormat(z.object({
-            keywords: z.array(z.object({
+            data: z.array(z.object({
                 phrase: z.string(),
                 explanation: z.string(),
             })),

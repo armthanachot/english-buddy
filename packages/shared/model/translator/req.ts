@@ -3,6 +3,8 @@ import { Type as t, type Static } from "@sinclair/typebox";
 export const TranslateRequestSchema = t.Object({
     text: t.String(),
     targetLanguage: t.Union([t.Literal("TH"), t.Literal("EN")]),
+    userId: t.String() //note: when implement auth will get from token instead and remove it
+
 });
 
 
@@ -24,22 +26,25 @@ export const SituationRequestSchema = t.Object({
             t.Literal("Slang"),
             t.Literal("Academic"),
             t.Literal("Grammatical")
-        ],{
-            default:"Grammatical"
+        ], {
+            default: "Grammatical"
         })),
-    })))
+    }))),
+    userId: t.String() //note: when implement auth will get from token instead and remove it
 });
 
 export const UsageExplanationRequestSchema = t.Object({
     text: t.String(),
     phrase: t.String(),
     explanationLanguage: t.Union([t.Literal("TH"), t.Literal("EN"), t.Literal("JA"), t.Literal("ZH"), t.Literal("VI"), t.Literal("ID")]),
+    userId: t.String() //note: when implement auth will get from token instead and remove it
 });
 
 
 export const KeywordDetectRequestSchema = t.Object({
     text: t.String(),
     language: t.Union([t.Literal("TH"), t.Literal("EN"), t.Literal("JA"), t.Literal("ZH"), t.Literal("VI"), t.Literal("ID")]),
+    userId: t.String() //note: when implement auth will get from token instead and remove it
 });
 
 export type TranslateRequest = Static<typeof TranslateRequestSchema>;
