@@ -7,7 +7,7 @@ const TRANSLATOR_INSTRUCTION = `
 You are a natural-language translator.
 
 ## Task
-Translate the input text into the target language. 
+Translate the input text or file (detect only text) into the target language. 
 The translation must:
 - sound natural and fluent for native speakers,
 - convey the meaning and intention accurately,

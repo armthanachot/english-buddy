@@ -2,6 +2,8 @@ import OpenAI from "openai";
 import type { TranslateRequest, SituationRequest, UsageExplanationRequest, KeywordDetectRequest } from "shared/model/translator/req";
 import type { KeywordDetectResponseSchemaType, SituationResponseSchemaType, TranslateResponseSchemaType, UsageExplanationResponseSchemaType } from "shared/model/translator/res";
 import { MAPPING_INSTRUCTION } from "./constant/instruction";
+import type { FileUploadRequestSchemaType } from "./model/req";
+import fs from 'fs'
 
 class TranslatorService {
     private readonly openai: OpenAI;
@@ -54,7 +56,7 @@ class TranslatorService {
             }
 
             console.log(situationTypesInstruction);
-            
+
 
             //trim situation type following user level
 
@@ -156,6 +158,44 @@ class TranslatorService {
                 message: "Failed to detect keywords",
                 error: error as string,
             }
+        }
+    }
+
+    public async fileTranslation({ file, targetLanguage }: FileUploadRequestSchemaType): Promise<TranslateResponseSchemaType> {
+        const f = await this.openai.files.create({
+            file: file,
+            purpose: 'user_data',
+        })
+
+        const { instruction, model, schema, temperature } = MAPPING_INSTRUCTION.Translator;
+        const aiResult = await this.openai.responses.parse({
+            temperature: temperature,
+            model: model,
+            instructions: instruction,
+            input: [
+                {
+                    role: "user",
+                    content: [
+                        {
+                            type: "input_file",
+                            file_id: f.id,
+                        },
+                        {
+                            type: "input_text",
+                            text: `Translate the following file to ${targetLanguage}`,
+                        },
+                    ]
+                }
+            ],
+            text: {
+                format: schema,
+            }
+        })
+
+        return {
+            data: {
+                translatedText: aiResult.output_parsed?.translatedText!,
+            },
         }
     }
 }
