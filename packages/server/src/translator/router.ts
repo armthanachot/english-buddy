@@ -1,7 +1,7 @@
 import Elysia from "elysia";
 import TranslatorService from "./service";
-import { SituationRequestSchema, TranslateRequestSchema, UsageExplanationRequestSchema, type SituationRequest, type TranslateRequest, type UsageExplanationRequest } from "shared/model/translator/req";
-import { SituationResponseSchema, TranslateResponseSchema, UsageExplanationResponseSchema } from "shared/model/translator/res";
+import { KeywordDetectRequestSchema, SituationRequestSchema, TranslateRequestSchema, UsageExplanationRequestSchema, type KeywordDetectRequest, type SituationRequest, type TranslateRequest, type UsageExplanationRequest } from "shared/model/translator/req";
+import { KeywordDetectResponseSchema, SituationResponseSchema, TranslateResponseSchema, UsageExplanationResponseSchema } from "shared/model/translator/res";
 
 const TranslatorRouter = new Elysia({
     prefix: "/translator"
@@ -21,6 +21,11 @@ const TranslatorRouter = new Elysia({
     }, {
         body: UsageExplanationRequestSchema,
         response: UsageExplanationResponseSchema,
+    }).post("/keyword-detect", async ({ body }) => {
+        return await TranslatorService.keywordDetect(body as KeywordDetectRequest);
+    }, {
+        body: KeywordDetectRequestSchema,
+        response: KeywordDetectResponseSchema,
     });
 
 export default TranslatorRouter;

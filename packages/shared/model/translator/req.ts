@@ -37,6 +37,12 @@ export const UsageExplanationRequestSchema = t.Object({
 });
 
 
+export const KeywordDetectRequestSchema = t.Object({
+    text: t.String(),
+    language: t.Union([t.Literal("TH"), t.Literal("EN"), t.Literal("JA"), t.Literal("ZH"), t.Literal("VI"), t.Literal("ID")]),
+});
+
 export type TranslateRequest = Static<typeof TranslateRequestSchema>;
 export type SituationRequest = Static<typeof SituationRequestSchema>;
 export type UsageExplanationRequest = Static<typeof UsageExplanationRequestSchema>;
+export type KeywordDetectRequest = Static<typeof KeywordDetectRequestSchema>;

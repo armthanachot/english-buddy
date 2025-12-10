@@ -1,6 +1,6 @@
 import OpenAI from "openai";
-import type { TranslateRequest, SituationRequest, UsageExplanationRequest } from "shared/model/translator/req";
-import type { SituationResponseSchemaType, TranslateResponseSchemaType, UsageExplanationResponseSchemaType } from "shared/model/translator/res";
+import type { TranslateRequest, SituationRequest, UsageExplanationRequest, KeywordDetectRequest } from "shared/model/translator/req";
+import type { KeywordDetectResponseSchemaType, SituationResponseSchemaType, TranslateResponseSchemaType, UsageExplanationResponseSchemaType } from "shared/model/translator/res";
 import { MAPPING_INSTRUCTION } from "./constant/instruction";
 
 class TranslatorService {
@@ -122,6 +122,38 @@ class TranslatorService {
             return {
                 success: false,
                 message: "Failed to generate usage explanation",
+                error: error as string,
+            }
+        }
+    }
+
+    public async keywordDetect({ text, language }: KeywordDetectRequest): Promise<KeywordDetectResponseSchemaType> {
+        try {
+            const { instruction, model, schema, temperature } = MAPPING_INSTRUCTION.KeywordDetect;
+            const aiResult = await this.openai.responses.parse({
+                temperature: temperature,
+                model: model,
+                instructions: instruction,
+                input: [
+                    {
+                        role: "user",
+                        content: `
+                        Detect the keywords in the following text: ${text}.
+                        and the language should be ${language} language.`
+                    }
+                ],
+                text: {
+                    format: schema,
+                }
+            })
+
+            return {
+                data: aiResult.output_parsed?.keywords!,
+            }
+        } catch (error) {
+            return {
+                success: false,
+                message: "Failed to detect keywords",
                 error: error as string,
             }
         }

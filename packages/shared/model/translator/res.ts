@@ -14,6 +14,12 @@ export const UsageExplanationResponseSchema = ResSchema(t.Object({
     usageExplanation: t.String(),
 }))
 
+export const KeywordDetectResponseSchema = ResSchema(t.Array(t.Object({
+    phrase: t.String(),
+    explanation: t.String(),
+})))
+
 export type TranslateResponseSchemaType = Static<typeof TranslateResponseSchema>;
 export type SituationResponseSchemaType = Static<typeof SituationResponseSchema>;
 export type UsageExplanationResponseSchemaType = Static<typeof UsageExplanationResponseSchema>;
+export type KeywordDetectResponseSchemaType = Static<typeof KeywordDetectResponseSchema>;

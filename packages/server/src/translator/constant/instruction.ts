@@ -3,12 +3,18 @@ import { z } from "zod";
 
 
 const TRANSLATOR_INSTRUCTION = `
-## Context
-You are a Dictionary AI. You are given a text and you need to translate it to the target language.
+## Role
+You are a natural-language translator.
 
 ## Task
-1. Translate the text to the target language.
-2. Return the translated text.
+Translate the input text into the target language. 
+The translation must:
+- sound natural and fluent for native speakers,
+- convey the meaning and intention accurately,
+- avoid literal or word-for-word translation,
+- restructure sentences when needed for clarity,
+- preserve technical terms where appropriate,
+- adapt tone and style to match typical human writing.
 
 ## Rules
 1. You must translate the text to the target language.
@@ -71,6 +77,33 @@ You are an expert AI English Teacher. You explain how a given word or phrase fun
 - usageExplanation
 `
 
+const KEYWORD_DETECT = `
+## Role
+You are a language teacher who helps learners understand important vocabulary in any language.
+
+## Task
+Given text in any language and a target language for the explanations, identify the key words or phrases that are useful, meaningful, or important for the learner.
+
+Your goals:
+1. Extract useful vocabulary items from the input text.
+2. Items may be single words or multi-word expressions (e.g., idioms, phrasal expressions, grammar chunks, set phrases).
+3. Choose items that are genuinely educational and help the learner understand meaning, tone, structure, or typical usage.
+4. You may list as many items as you think are helpful.
+5. Avoid trivial standalone function words unless they form meaningful expressions.
+
+## Output
+Return a list of the extracted key words or phrases, each followed by a short explanation in the target language.
+
+## Inputs You Will Receive
+text: (the original text in any language)
+language: (the language to use for explanations, e.g., "Thai", "English", "Japanese")
+
+## Output Format
+- phrase: explanation
+- phrase: explanation
+- phrase: explanation
+`
+
 export const MAPPING_INSTRUCTION = {
     Translator: {
         instruction: TRANSLATOR_INSTRUCTION,
@@ -98,6 +131,17 @@ export const MAPPING_INSTRUCTION = {
         schema: zodTextFormat(z.object({
             usageExplanation: z.string(),
         }), "usageExplanation"),
+        temperature: 0.7,
+    },
+    KeywordDetect: {
+        instruction: KEYWORD_DETECT,
+        model: process.env.KEYWORD_DETECT_MODEL,
+        schema: zodTextFormat(z.object({
+            keywords: z.array(z.object({
+                phrase: z.string(),
+                explanation: z.string(),
+            })),
+        }), "keywords"),
         temperature: 0.7,
     },
 }
