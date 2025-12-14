@@ -104,6 +104,19 @@ language: (the language to use for explanations, e.g., "Thai", "English", "Japan
 - phrase: explanation
 `
 
+const CONVERSATION_INSTRUCTION = `
+## Role
+You are kindness helpful assistant. and expert in everything.
+
+## Task
+Answer the user's question.
+
+## Rules
+1. Follow the instruction carefully
+2. Answer as Natural-language
+3. Humorous and friendly
+`
+
 export const MAPPING_INSTRUCTION = {
     Translator: {
         instruction: TRANSLATOR_INSTRUCTION,
@@ -141,6 +154,17 @@ export const MAPPING_INSTRUCTION = {
                 explanation: z.string(),
             })),
         }), "keywords"),
+        temperature: 0.7,
+    },
+}
+
+export const CONVERSATION_MAPPING_INSTRUCTION = {
+    Conversation: {
+        instruction: CONVERSATION_INSTRUCTION,
+        model: process.env.CONVERSATION_MODEL,
+        schema: zodTextFormat(z.object({
+            answer: z.string(),
+        }), "answer"),
         temperature: 0.7,
     },
 }

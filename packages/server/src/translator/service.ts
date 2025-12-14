@@ -1,13 +1,13 @@
 import OpenAI from "openai";
 import type { TranslateRequest, SituationRequest, UsageExplanationRequest, KeywordDetectRequest } from "shared/model/translator/req";
-import type { KeywordDetectResponseSchemaType, SituationResponseSchemaType, TKeywordDetect, TSituation, TranslateResponseSchemaType, TTranslate, UsageExplanationResponseSchemaType, TUsageExplanation } from "shared/model/translator/res";
-import { MAPPING_INSTRUCTION } from "./constant/instruction";
-import type { AIParseSchemaType, FileUploadRequestSchemaType } from "./model/req";
+import type { KeywordDetectResponseSchemaType, SituationResponseSchemaType, TKeywordDetect, TSituation, TranslateResponseSchemaType, TTranslate, UsageExplanationResponseSchemaType, TUsageExplanation, ConversationResponseSchemaType, TConversation } from "shared/model/translator/res";
+import { CONVERSATION_MAPPING_INSTRUCTION, MAPPING_INSTRUCTION } from "./constant/instruction";
+import type { AIParseSchemaType, ConversationRequestSchemaType, FileUploadRequestSchemaType } from "./model/req";
 import type { drizzle } from "drizzle-orm/node-postgres";
 import db from "../../dependencies/db";
 import type { GetUserByIdResponse } from "shared/model/user/res";
 import { userTable } from "../../schema/user";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { userConversationTable } from "../../schema/user_conversation";
 import type { ResponseInput } from "openai/resources/responses/responses.mjs";
 class TranslatorService {
@@ -43,8 +43,8 @@ class TranslatorService {
         }
     }
 
-    private async _getUserConversationId(userId: string): Promise<string> {
-        const conv = await this._db.select().from(userConversationTable).where(eq(userConversationTable.userId, userId))
+    private async _getUserConversationId(userId: string, type: keyof typeof MAPPING_INSTRUCTION): Promise<string> {
+        const conv = await this._db.select().from(userConversationTable).where(and(eq(userConversationTable.userId, userId), eq(userConversationTable.type, type), eq(userConversationTable.isActive, true)))
         if (!conv.length) {
             throw new Error("Conversation not found");
         }
@@ -60,9 +60,11 @@ class TranslatorService {
 
     private async _aiParse<T extends TTranslate | TSituation | TUsageExplanation | TKeywordDetect>(param: AIParseSchemaType, input: string | ResponseInput | undefined): Promise<T> {
         await this._getUserById(param.userId); //check if user exists
-        const conversationId = await this._getUserConversationId(param.userId); //check if user has conversation
-
+        
         const { instruction, model, schema, temperature } = MAPPING_INSTRUCTION[param.type as keyof typeof MAPPING_INSTRUCTION];
+
+        const conversationId = await this._getUserConversationId(param.userId, param.type); //check if user has conversation
+
 
         const aiResult = await this.openai.responses.parse({
             temperature: temperature,
@@ -210,6 +212,30 @@ class TranslatorService {
 
         return {
             data: resp,
+        };
+    }
+
+    public async conversation({ conversationId, prompt }: ConversationRequestSchemaType): Promise<ConversationResponseSchemaType> {
+
+        const { instruction, model, schema, temperature } = CONVERSATION_MAPPING_INSTRUCTION.Conversation;
+
+        const result = await this.openai.responses.parse({
+            temperature: temperature,
+            model: model,
+            conversation: conversationId,
+            instructions: instruction,
+            input: prompt,
+            text: {
+                format: schema,
+            },
+        })
+
+        if (result.output_parsed == null) {
+            throw new Error("AI parsing failed: output_parsed is null");
+        }
+
+        return {
+            data: result.output_parsed as TConversation,
         };
     }
 }
