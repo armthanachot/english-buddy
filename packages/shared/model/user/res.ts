@@ -15,6 +15,10 @@ export const GetUserByIdResponseSchema = ResSchema(t.Object({
     id: t.String(),
     name: t.String(),
     email: t.String(),
+    conversations: t.Array(t.Object({
+        conversationId: t.String(),
+        type: t.String(),
+    })),
 }));
 
 export type CreateUserResponse = Static<typeof CreateUserResponseSchema>;

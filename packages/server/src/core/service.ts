@@ -1,11 +1,11 @@
 import OpenAI from "openai";
-import type { CreateUserConversationResponseSchemaType, DeleteUserConversationResponseSchemaType } from "shared/model/core/res";
+import type { CreateUserConversationResponseSchemaType, DeleteUserConversationResponseSchemaType, SetUserConversationAvailableResponseSchemaType } from "shared/model/core/res";
 import db from "../../dependencies/db";
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { userConversationTable } from "../../schema/user_conversation";
 import { userTable } from "../../schema/user";
 import { and, eq } from "drizzle-orm";
-import type { CreateUserConversationRequest, DeleteUserConversationRequest } from "shared/model/core/req";
+import type { CreateUserConversationRequest, DeleteUserConversationRequest, SetUserConversationAvailableRequest } from "shared/model/core/req";
 
 
 class CoreService {
@@ -48,16 +48,51 @@ class CoreService {
         return { data: { conversationId: resp.id } }
     }
 
-    public async deleteConversationId(body: DeleteUserConversationRequest): Promise<DeleteUserConversationResponseSchemaType> {
+    public async setUserConversationAvailable(body: SetUserConversationAvailableRequest): Promise<SetUserConversationAvailableResponseSchemaType> {
         const user = await this._db.select().from(userTable).where(eq(userTable.id, body.userId))
         if (!user.length) {
             throw new Error("User not found");
         }
 
-        await this._db.delete(userConversationTable).where(and(eq(userConversationTable.conversationId, body.conversationId), eq(userConversationTable.userId, body.userId), eq(userConversationTable.isActive, true)))
+        const existingConversation = await this._db.select().from(userConversationTable).where(and(eq(userConversationTable.conversationId, body.conversationId), eq(userConversationTable.userId, body.userId)))
+        if (!existingConversation.length) {
+            throw new Error("Conversation not found");
+        }
+
+        const [conversation] = existingConversation;
+        if (!conversation) {
+            throw new Error("Conversation not found");
+        }
+
+        const status = conversation.isActive ? false : true;
+
+        await this._db.update(userConversationTable).set({ isActive: status }).where(eq(userConversationTable.id, conversation.id))
 
         return { data: { success: true } }
     }
+
+    public async deleteUserConversation(body: DeleteUserConversationRequest): Promise<DeleteUserConversationResponseSchemaType> {
+        const user = await this._db.select().from(userTable).where(eq(userTable.id, body.userId))
+        if (!user.length) {
+            throw new Error("User not found");
+        }
+
+        const existingConversation = await this._db.select().from(userConversationTable).where(and(eq(userConversationTable.conversationId, body.conversationId), eq(userConversationTable.userId, body.userId)))
+        if (!existingConversation.length) {
+            throw new Error("Conversation not found");
+        }
+
+        const [conversation] = existingConversation;
+        if (conversation?.isActive) {
+            throw new Error("Conversation is active cannot be deleted");
+        }
+
+        await this._db.update(userConversationTable).set({ deletedAt: new Date() }).where(eq(userConversationTable.id, conversation!.id))
+
+        await this.openai.delete(conversation!.conversationId)
+        return { data: { success: true } }
+    }
+
 }
 
 export default new CoreService();

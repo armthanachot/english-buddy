@@ -1,7 +1,7 @@
-import Elysia from "elysia";
+import Elysia, { t } from "elysia";
 import User from "./service";
 import { CreateUserRequestSchema, GetAllUserQuerySchema, type CreateUserRequest, type GetAllUserQuery } from "shared/model/user/req";
-import { CreateUserResponseSchema, GetAllUserResponseSchema } from "shared/model/user/res";
+import { CreateUserResponseSchema, GetAllUserResponseSchema, GetUserByIdResponseSchema } from "shared/model/user/res";
 
 const UserRouter = new Elysia({
     prefix: "/user"
@@ -11,6 +11,14 @@ const UserRouter = new Elysia({
     query: GetAllUserQuerySchema,
     response: GetAllUserResponseSchema,
 })
+    .get("/:id", async ({ params }) => {
+        return await User.getUserById(params.id as string);
+    }, {
+        params: t.Object({
+            id: t.String(),
+        }),
+        response: GetUserByIdResponseSchema,
+    })
     .post("", async ({ body }) => {
         return await User.createUser(body as CreateUserRequest);
     }, {

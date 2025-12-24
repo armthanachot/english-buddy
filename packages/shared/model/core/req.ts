@@ -5,10 +5,16 @@ export const CreateUserConversationRequestSchema = t.Object({
     type: t.Union([t.Literal("Translator"), t.Literal("Situation"), t.Literal("UsageExplanation"), t.Literal("KeywordDetect")]),
 });
 
+export const SetUserConversationAvailableRequestSchema = t.Object({
+    userId: t.String(),
+    conversationId: t.String(),
+});
+
 export const DeleteUserConversationRequestSchema = t.Object({
     userId: t.String(),
     conversationId: t.String(),
 });
 
 export type CreateUserConversationRequest = Static<typeof CreateUserConversationRequestSchema>;
+export type SetUserConversationAvailableRequest = Static<typeof SetUserConversationAvailableRequestSchema>;
 export type DeleteUserConversationRequest = Static<typeof DeleteUserConversationRequestSchema>;
