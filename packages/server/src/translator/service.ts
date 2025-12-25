@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import type { TranslateRequest, SituationRequest, UsageExplanationRequest, KeywordDetectRequest } from "shared/model/translator/req";
 import type { KeywordDetectResponseSchemaType, SituationResponseSchemaType, TKeywordDetect, TSituation, TranslateResponseSchemaType, TTranslate, UsageExplanationResponseSchemaType, TUsageExplanation, ConversationResponseSchemaType, TConversation } from "shared/model/translator/res";
-import { CONVERSATION_MAPPING_INSTRUCTION, MAPPING_INSTRUCTION } from "./constant/instruction";
+import { CONVERSATION_MAPPING_INSTRUCTION, MAPPING_INSTRUCTION, MARKDOWN_GENERATION_INSTRUCTION } from "./constant/instruction";
 import type { AIParseSchemaType, ConversationRequestSchemaType, FileUploadRequestSchemaType } from "./model/req";
 import type { drizzle } from "drizzle-orm/node-postgres";
 import db from "../../dependencies/db";
@@ -10,6 +10,7 @@ import { userTable } from "../../schema/user";
 import { and, eq } from "drizzle-orm";
 import { userConversationTable } from "../../schema/user_conversation";
 import type { ResponseInput } from "openai/resources/responses/responses.mjs";
+import { genMd } from "../../utils/markdown_gen";
 class TranslatorService {
     private readonly openai: OpenAI;
     private readonly _db: ReturnType<typeof drizzle>
@@ -39,6 +40,7 @@ class TranslatorService {
                 id: user.id,
                 name: user.name,
                 email: user.email,
+                conversations: [],
             }
         }
     }
@@ -76,6 +78,9 @@ class TranslatorService {
                 format: schema,
             }
         })
+
+        console.log(aiResult.usage);
+        
 
         if (aiResult.output_parsed == null) {
             throw new Error("AI parsing failed: output_parsed is null");
@@ -152,6 +157,9 @@ class TranslatorService {
                     content: `Explain how the following text ${text} is used in a specific phrase: ${phrase}. and the explanation language should be ${explanationLanguage} language.`
                 }
             ]);
+
+            genMd(resp.usageExplanation, MARKDOWN_GENERATION_INSTRUCTION);
+
             return {
                 data: resp,
             };
@@ -229,6 +237,9 @@ class TranslatorService {
                 format: schema,
             },
         })
+
+        console.log(result.usage);
+        
 
         if (result.output_parsed == null) {
             throw new Error("AI parsing failed: output_parsed is null");

@@ -1,11 +1,11 @@
 import OpenAI from "openai";
-import type { CreateUserConversationResponseSchemaType, DeleteUserConversationResponseSchemaType, SetUserConversationAvailableResponseSchemaType } from "shared/model/core/res";
+import type { ClearAllConversationResponseSchemaType, CreateUserConversationResponseSchemaType, DeleteUserConversationResponseSchemaType, SetUserConversationAvailableResponseSchemaType } from "shared/model/core/res";
 import db from "../../dependencies/db";
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { userConversationTable } from "../../schema/user_conversation";
 import { userTable } from "../../schema/user";
 import { and, eq } from "drizzle-orm";
-import type { CreateUserConversationRequest, DeleteUserConversationRequest, SetUserConversationAvailableRequest } from "shared/model/core/req";
+import type { ClearAllConversationRequest, CreateUserConversationRequest, DeleteUserConversationRequest, SetUserConversationAvailableRequest } from "shared/model/core/req";
 
 
 class CoreService {
@@ -90,6 +90,36 @@ class CoreService {
         await this._db.update(userConversationTable).set({ deletedAt: new Date() }).where(eq(userConversationTable.id, conversation!.id))
 
         await this.openai.delete(conversation!.conversationId)
+        return { data: { success: true } }
+    }
+
+    public async clearAllConversation(body: ClearAllConversationRequest): Promise<ClearAllConversationResponseSchemaType> {
+        const { userId, conversationType } = body;
+        const user = await this._db.select().from(userTable).where(eq(userTable.id, userId))
+        if (!user.length) {
+            throw new Error("User not found");
+        }
+
+        const conversations = await this._db.select().from(userConversationTable).where(and(eq(userConversationTable.userId, userId), eq(userConversationTable.type, conversationType)))
+        if (!conversations.length) {
+            throw new Error("Conversation not found");
+        }
+
+        const [conversation] = conversations;
+
+        console.log(conversation!.conversationId);
+        
+
+        const conversationItems = await this.openai.conversations.items.list(conversation!.conversationId, {
+            limit: 100,
+        })
+
+        for (const item of conversationItems.data) {
+            await this.openai.conversations.items.delete(item.id!, {
+                conversation_id: conversation!.conversationId,
+            })
+        }
+
         return { data: { success: true } }
     }
 
